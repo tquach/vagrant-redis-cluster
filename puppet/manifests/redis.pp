@@ -1,34 +1,35 @@
 
-class redis {
+class redis(
+    $port = 6379,
+    $slave_priority = 100
+  ) {
   include apt
   apt::ppa { "ppa:chris-lea/redis-server": }
 
   exec { 'apt-get update':
-    command => '/usr/bin/apt-get update',
+    command => '/usr/bin/apt-get -q -y update',
   }
   
   file { 'db-folder':
     ensure => "directory",
-    path => "/var/lib/redis-${node_id}",
+    path => "/var/lib/redis_data",
   }
 
   package { ["redis-server"]:
-    ensure => present,
+    ensure => installed,
     require => Exec["apt-get update"],
-    before => File['/etc/redis/redis_${node_id}.conf'],
   }
 
-  file { '/etc/redis/redis_${node_id}.conf':
-    ensure => present,
-    path => "/etc/redis/redis_${node_id}",
+  file { 'redis.conf':
+    ensure => file,
+    path => "/etc/redis/redis.conf",
     content => template('redis/redis.conf.erb'),
-    require => File['db-folder'],
+    require => [Package["redis-server"], File['db-folder']],
   }
 
-  service { 'redis-server-${node_id}':
+  service { 'redis-server':
     ensure => running,
-    subscribe => File['/etc/redis/redis_${node_id}.conf'],
-    require => Package["redis-server"]
+    subscribe => File['redis.conf'],
   }
 }
 

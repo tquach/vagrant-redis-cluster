@@ -46,10 +46,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Master configuration
   config.vm.define "master_node" do |master|
     options = {
-      "node_id" => "master",
       "slave" => false,
-      "port" => 6379,
-      "slave_priority" => 100,
       "master_ip" => MASTER_IP_ADDRESS,
       "master_port" => MASTER_PORT
     } 
@@ -59,9 +56,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   REDIS_SLAVE_INSTANCES.times do |idx|
     config.vm.define "slave_node_#{idx}" do |slave|
       options = {
-        "node_id" => idx,
         "slave" => true,
-        "port" => 6379 + idx,
         "master_ip" => MASTER_IP_ADDRESS,
         "slave_priority" => 100 + idx,
         "master_port" => MASTER_PORT
