@@ -28,10 +28,9 @@ rdbchecksum yes
 dbfilename dump.rdb
 dir /var/lib/redis_data
 
+<% if @slave == true -%>
 ################################# REPLICATION #################################
-<% if slave -%>
 slaveof <%= master_ip %> <%= master_port %>
-<% end -%>
 
 slave-serve-stale-data yes
 slave-read-only yes
@@ -39,6 +38,8 @@ slave-read-only yes
 repl-disable-tcp-nodelay no
 
 slave-priority <%= slave_priority %>
+
+<% end -%>
 
 ################################### LIMITS ####################################
 

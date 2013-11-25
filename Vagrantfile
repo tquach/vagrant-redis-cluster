@@ -15,7 +15,7 @@ MASTER_PORT = 6379
 
 SLAVE_IP_PREFIX = "10.10.25.10"
 
-def setup_node(config, ip_addr, options)
+def setup_node(config, ip_addr, options = {})
   config.vm.network :private_network, ip: ip_addr
   config.vm.provision "shell", path: "shell/main.sh"
 
@@ -45,12 +45,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Master configuration
   config.vm.define "master_node" do |master|
-    options = {
-      "slave" => false,
-      "master_ip" => MASTER_IP_ADDRESS,
-      "master_port" => MASTER_PORT
-    } 
-    setup_node(config, MASTER_IP_ADDRESS, options)
+    setup_node(config, MASTER_IP_ADDRESS)
   end
 
   REDIS_SLAVE_INSTANCES.times do |idx|

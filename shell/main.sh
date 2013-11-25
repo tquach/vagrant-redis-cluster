@@ -26,3 +26,5 @@ if [ "$(gem search -i librarian-puppet)" = "false" ]; then
 else
   cd $PUPPET_DIR && librarian-puppet update
 fi
+
+rm -fR /var/lib/apt/lists/*
