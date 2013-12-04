@@ -1,16 +1,26 @@
-daemonize no
+daemonize yes
 
-pidfile /var/run/redis.pid
+pidfile /var/run/redis/redis-server.pid
 
 port <%= port %>
 
+# By default Redis listens for connections from all the network interfaces
+# available on the server. It is possible to listen to just one or multiple
+# interfaces using the "bind" configuration directive, followed by one or
+# more IP addresses.
+#
+# Examples:
+#
+# bind 192.168.1.100 10.0.0.1
+
+bind <%= @ip %> 
 timeout 0
 
 tcp-keepalive 0
 
 loglevel notice
 
-logfile /var/log/redis/redis.log
+logfile /var/log/redis/redis-server.log
 
 # Set the number of databases. The default database is DB 0, you can select
 # a different one on a per-connection basis using SELECT <dbid> where
@@ -28,8 +38,8 @@ rdbchecksum yes
 dbfilename dump.rdb
 dir /var/lib/redis_data
 
-<% if @slave == true -%>
 ################################# REPLICATION #################################
+<% if @slave == true -%>
 slaveof <%= master_ip %> <%= master_port %>
 
 slave-serve-stale-data yes
@@ -93,13 +103,3 @@ client-output-buffer-limit pubsub 32mb 8mb 60
 hz 10
 
 aof-rewrite-incremental-fsync yes
-
-################################## INCLUDES ###################################
-
-# Include one or more other config files here.  This is useful if you
-# have a standard template that goes to all Redis server but also need
-# to customize a few per-server settings.  Include files can include
-# other files, so use this wisely.
-#
-# include /path/to/local.conf
-# include /path/to/other.conf

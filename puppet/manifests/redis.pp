@@ -18,23 +18,37 @@ class redis(
     require => Exec["apt-get update"],
   }
 
+  # package { ['redis-commander']:
+  #   ensure   => latest,
+  #   provider => 'npm',
+  #   require => Package['redis-server'],
+  # }
+
   file { 'db-folder':
     ensure => "directory",
     path => "/var/lib/redis_data",
+    owner => "redis",
+    group => "redis",
   }
 
   file { 'redis.conf':
     ensure => file,
     path => "/etc/redis/redis.conf",
     content => template('redis/redis.conf.erb'),
+    # content => template('redis/redis.conf.sample'),
     require => [Package["redis-server"], File['db-folder']],
   }
 
   service { 'redis-server':
     ensure => running,
     subscribe => File['redis.conf'],
-    require => Package["redis-server"],
+    require => Package['redis-server'],
   }
+
+  # service { 'redis-commander':
+  #   ensure => running,
+  #   require => Package['redis-commander'],
+  # }
 }
 
 include redis

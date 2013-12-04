@@ -5,7 +5,7 @@
 VAGRANTFILE_API_VERSION = "2"
 
 # How many redis servers. Max 255.
-REDIS_SLAVE_INSTANCES = 1
+REDIS_SLAVE_INSTANCES = 0
 
 BASE_BOX = "precise64"
 BASE_BOX_URL = "http://files.vagrantup.com/precise64.box"
@@ -13,7 +13,7 @@ BASE_BOX_URL = "http://files.vagrantup.com/precise64.box"
 MASTER_IP_ADDRESS = "10.10.25.100"
 MASTER_PORT = 6379
 
-SLAVE_IP_PREFIX = "10.10.25.10"
+SLAVE_IP_PREFIX = "10.10.25.2"
 
 def setup_node(config, ip_addr, options = {})
   config.vm.network :private_network, ip: ip_addr
@@ -24,12 +24,17 @@ def setup_node(config, ip_addr, options = {})
     puppet.manifests_path = "puppet/manifests"
     puppet.manifest_file  = "redis.pp"
     puppet.options = [
-      "--templatedir", "/tmp/vagrant-puppet/templates",
-      "--verbose",
-      "--debug"
+      "--templatedir", "/tmp/vagrant-puppet/templates"
     ]
-    puppet.facter = options
+    puppet.facter = options.merge('ip' => ip_addr)
   end
+
+  config.vm.provider "virtualbox" do |provider|
+    provider.customize ["modifyvm", :id, "--memory", 512]
+    provider.customize ["modifyvm", :id, "--cpus", 1]
+    provider.customize ["modifyvm", :id, "--cpuexecutioncap", 50]
+  end
+
 end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -49,6 +54,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   REDIS_SLAVE_INSTANCES.times do |idx|
+    ip_addr = "#{SLAVE_IP_PREFIX}#{idx}"
     config.vm.define "slave_node_#{idx}" do |slave|
       options = {
         "slave" => true,
@@ -56,7 +62,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         "slave_priority" => 100 + idx,
         "master_port" => MASTER_PORT
       }
-      setup_node(slave, "#{SLAVE_IP_PREFIX}#{idx}", options)
+      setup_node(slave, ip_addr, options)
     end
   end
 end

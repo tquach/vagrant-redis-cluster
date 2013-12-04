@@ -9,3 +9,6 @@ mod "apt",
  
 mod "stdlib",
    :git => "git://github.com/puppetlabs/puppetlabs-stdlib.git"
+
+mod "nodejs",
+    :git => "git://github.com/puppetlabs/puppetlabs-nodejs.git"
