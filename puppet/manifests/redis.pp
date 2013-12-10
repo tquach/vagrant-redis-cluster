@@ -15,6 +15,7 @@ class redis(
 
   package { ["redis-server"]:
     ensure => installed,
+    before => File['db-folder'],
     require => Exec["apt-get update"],
   }
 
@@ -26,7 +27,7 @@ class redis(
 
   file { 'db-folder':
     ensure => "directory",
-    path => "/var/lib/redis_data",
+    path => "/var/lib/redis",
     owner => "redis",
     group => "redis",
   }
