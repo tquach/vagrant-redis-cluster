@@ -10,6 +10,11 @@ BASE_BOX_URL = "http://files.vagrantup.com/precise64.box"
 # How many redis servers. Max 255.
 REDIS_SLAVE_INSTANCES = 1
 MASTER_IP_ADDRESS = "10.10.25.100"
+
+# Uncomment this if the master node requires authentication
+# MASTER_AUTH = "password"
+MASTER_AUTH = ""
+
 SLAVE_IP_PREFIX = "10.10.25.2"
 DEFAULT_PORT = 6379
 
@@ -22,7 +27,7 @@ def setup_node(config, ip_addr, options = {})
     puppet.manifests_path = "puppet/manifests"
     puppet.manifest_file  = "redis.pp"
     puppet.options = [
-      "--templatedir", "/tmp/vagrant-puppet/templates"
+      "--templatedir", "/tmp/vagrant-puppet/templates",
     ]
     puppet.facter = options.merge('ip' => ip_addr)
   end
@@ -39,24 +44,21 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = BASE_BOX
   config.vm.box_url = BASE_BOX_URL
   config.vm.synced_folder 'puppet/templates/', '/tmp/vagrant-puppet/templates'
-  # config.vm.provider :virtualbox do |vb|
-  #   # This allows symlinks to be created within the /vagrant root directory, 
-  #   # which is something librarian-puppet needs to be able to do. This might
-  #   # be enabled by default depending on what version of VirtualBox is used.
-  #   vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
-  # end
 
   # Master configuration
   config.vm.define "master_node" do |master|
-    setup_node(config, MASTER_IP_ADDRESS)
+    options = {"redis_password" => MASTER_AUTH}
+    setup_node(config, MASTER_IP_ADDRESS, options)
   end
 
   REDIS_SLAVE_INSTANCES.times do |idx|
     ip_addr = "#{SLAVE_IP_PREFIX}#{idx}"
     config.vm.define "slave_node_#{idx}" do |slave|
+      # Add a redis_password option below if desired.
+      # e.g. "redis_password" => "my_password"
       options = {
-        "slave" => true,
         "master_ip" => MASTER_IP_ADDRESS,
+        "master_auth" => MASTER_AUTH,
         "slave_priority" => 100 + idx,
         "master_port" => DEFAULT_PORT
       }

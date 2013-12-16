@@ -2,7 +2,7 @@ daemonize yes
 
 pidfile /var/run/redis/redis-server.pid
 
-port <%= port %>
+port <%= @port %>
 
 # By default Redis listens for connections from all the network interfaces
 # available on the server. It is possible to listen to just one or multiple
@@ -39,16 +39,19 @@ dbfilename dump.rdb
 dir /var/lib/redis
 
 ################################# REPLICATION #################################
-<% if @slave == true -%>
-slaveof <%= master_ip %> <%= master_port %>
+<% if @master_ip %>
+slaveof <%= @master_ip %> <%= @master_port %>
 
 slave-serve-stale-data yes
 slave-read-only yes
 
 repl-disable-tcp-nodelay no
 
-slave-priority <%= slave_priority %>
+slave-priority <%= @slave_priority %>
+<% end -%>
 
+<% if @master_auth %>
+masterauth <%= @master_auth %>
 <% end -%>
 
 ################################## SECURITY ###################################
@@ -64,7 +67,10 @@ slave-priority <%= slave_priority %>
 # 150k passwords per second against a good box. This means that you should
 # use a very strong password otherwise it will be very easy to break.
 #
-# requirepass foobared
+# requirepass foobar
+<% if @redis_password %>
+requirepass <%= @redis_password %>
+<% end -%>
 
 # Command renaming.
 #

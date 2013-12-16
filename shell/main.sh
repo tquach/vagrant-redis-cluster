@@ -23,6 +23,8 @@ fi
 if [ "$(gem search -i librarian-puppet)" = "false" ]; then
   gem install librarian-puppet
   cd $PUPPET_DIR && librarian-puppet install --clean
+  echo 'librarian installed.'
 else
   cd $PUPPET_DIR && librarian-puppet update
+  echo 'librarian updated.'
 fi
