@@ -4,16 +4,14 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
-# How many redis servers. Max 255.
-REDIS_SLAVE_INSTANCES = 0
-
 BASE_BOX = "precise64"
 BASE_BOX_URL = "http://files.vagrantup.com/precise64.box"
 
+# How many redis servers. Max 255.
+REDIS_SLAVE_INSTANCES = 1
 MASTER_IP_ADDRESS = "10.10.25.100"
-MASTER_PORT = 6379
-
 SLAVE_IP_PREFIX = "10.10.25.2"
+DEFAULT_PORT = 6379
 
 def setup_node(config, ip_addr, options = {})
   config.vm.network :private_network, ip: ip_addr
@@ -60,7 +58,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         "slave" => true,
         "master_ip" => MASTER_IP_ADDRESS,
         "slave_priority" => 100 + idx,
-        "master_port" => MASTER_PORT
+        "master_port" => DEFAULT_PORT
       }
       setup_node(slave, ip_addr, options)
     end
